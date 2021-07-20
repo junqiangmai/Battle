@@ -1,5 +1,7 @@
 import pygame
 import random
+
+from pygame.constants import BLEND_RGB_SUB
 import button
 
 pygame.init()
@@ -69,6 +71,8 @@ def draw_panel():
     # show knight stats
     draw_text(f'{knight.name} HP: {knight.hp}', font,
               red, 100, screen_height - bottom_panel + 10)
+    draw_text(f'{knight.name} MP: {knight.mp}', font,
+              BLEND_RGB_SUB, 150, screen_height - bottom_panel + 10)
     for count, i in enumerate(bandit_list):
         # show name and health
         draw_text(f'{i.name} HP: {i.hp}', font, red, 550,
@@ -77,10 +81,12 @@ def draw_panel():
 
 # fighter class
 class Fighter():
-    def __init__(self, x, y, name, max_hp, strength, potions):
+    def __init__(self, x, y, name, max_hp, max_mp, strength, potions):
         self.name = name
         self.max_hp = max_hp
         self.hp = max_hp
+        self.max_mp = max_hp
+        self.mp = max_mp
         self.strength = strength
         self.start_potions = potions
         self.potions = potions
@@ -207,6 +213,22 @@ class HealthBar():
         pygame.draw.rect(screen, green, (self.x, self.y, 150 * ratio, 20))
 
 
+class ManaBar():
+    def __init__(self, x, y, mp, max_mp):
+        self.x = x
+        self.y = y
+        self.mp = mp
+        self.max_mp = max_mp
+
+    def draw(self, mp):
+        # update with new health
+        self.mp = mp
+        # calculate health ratio
+        ratio = self.mp / self.max_mp
+        pygame.draw.rect(screen, red, (self.x, self.y, 150, 20))
+        pygame.draw.rect(screen, green, (self.x, self.y, 150 * ratio, 20))
+
+
 class DamageText(pygame.sprite.Sprite):
     def __init__(self, x, y, damage, colour):
         pygame.sprite.Sprite.__init__(self)
@@ -238,6 +260,8 @@ bandit_list.append(bandit2)
 
 knight_health_bar = HealthBar(
     100, screen_height - bottom_panel + 40, knight.hp, knight.max_hp)
+knight_mana_bar = ManaBar(
+    150, screen_height - bottom_panel + 40, knight.hp, knight.max_hp)
 bandit1_health_bar = HealthBar(
     550, screen_height - bottom_panel + 40, bandit1.hp, bandit1.max_hp)
 bandit2_health_bar = HealthBar(
@@ -261,6 +285,7 @@ while run:
     knight_health_bar.draw(knight.hp)
     bandit1_health_bar.draw(bandit1.hp)
     bandit2_health_bar.draw(bandit2.hp)
+    knight_mana_bar.draw(knight.mp)
 
     # draw fighters
     knight.update()
